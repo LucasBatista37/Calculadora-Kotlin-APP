@@ -1,62 +1,149 @@
 package com.example.myapplication
 
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
-import android.widget.EditText
 import android.widget.TextView
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 
-class MainActivity : AppCompatActivity(), View.OnClickListener {
+class MainActivity : AppCompatActivity() {
 
-    lateinit var btnAdd : Button
-    lateinit var btnSub : Button
-    lateinit var btnMultiply : Button
-    lateinit var btnDivision : Button
-    lateinit var etA : EditText
-    lateinit var etB : EditText
-    lateinit var resulty : TextView
+    private lateinit var tvExpression: TextView
+    private lateinit var tvResult: TextView
+
+    private var firstNumber = 0.0
+    private var secondNumber = 0.0
+    private var operator = ""
+
+    private var isNewNumber = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_main)
-        btnAdd = findViewById<Button>(R.id.btn_add)
-        btnSub = findViewById<Button>(R.id.btn_subtraction)
-        btnMultiply = findViewById<Button>(R.id.btn_multiplication)
-        btnDivision = findViewById<Button>(R.id.btn_division)
-        etA = findViewById(R.id.et_a)
-        etB = findViewById(R.id.et_b)
-        resulty = findViewById(R.id.result_tv)
 
-        btnAdd.setOnClickListener(this)
-        btnSub.setOnClickListener(this)
-        btnMultiply.setOnClickListener(this)
-        btnDivision.setOnClickListener(this)
-    }
+        tvExpression = findViewById(R.id.tvExpression)
+        tvResult = findViewById(R.id.tvResult)
 
+        val numberClickListener = View.OnClickListener { v ->
+            val b = v as Button
+            val digit = b.text.toString()
 
-    override fun onClick(v: View?) {
-        var a = etA.text.toString().toDouble()
-        var b = etB.text.toString().toDouble()
-        var result = 0.0
-        when(v?.id) {
-            R.id.btn_add -> {
-                result = a + b
+            val currentText = tvExpression.text.toString()
+
+            if (currentText == "0" && digit != ".") {
+                tvExpression.text = digit
+            } else {
+                tvExpression.append(digit)
             }
-            R.id.btn_subtraction -> {
-                result = a - b
+
+            isNewNumber = false
+        }
+
+        findViewById<Button>(R.id.btn0).setOnClickListener(numberClickListener)
+        findViewById<Button>(R.id.btn1).setOnClickListener(numberClickListener)
+        findViewById<Button>(R.id.btn2).setOnClickListener(numberClickListener)
+        findViewById<Button>(R.id.btn3).setOnClickListener(numberClickListener)
+        findViewById<Button>(R.id.btn4).setOnClickListener(numberClickListener)
+        findViewById<Button>(R.id.btn5).setOnClickListener(numberClickListener)
+        findViewById<Button>(R.id.btn6).setOnClickListener(numberClickListener)
+        findViewById<Button>(R.id.btn7).setOnClickListener(numberClickListener)
+        findViewById<Button>(R.id.btn8).setOnClickListener(numberClickListener)
+        findViewById<Button>(R.id.btn9).setOnClickListener(numberClickListener)
+        findViewById<Button>(R.id.btnDot).setOnClickListener(numberClickListener)
+
+        val operatorClickListener = View.OnClickListener { v ->
+            val b = v as Button
+            operator = b.text.toString()
+
+            firstNumber = parseDoubleSafe(tvExpression.text.toString())
+
+            tvExpression.append(" $operator ")
+
+            isNewNumber = false
+        }
+
+        findViewById<Button>(R.id.btnAdd).setOnClickListener(operatorClickListener)
+        findViewById<Button>(R.id.btnSubtract).setOnClickListener(operatorClickListener)
+        findViewById<Button>(R.id.btnMultiply).setOnClickListener(operatorClickListener)
+        findViewById<Button>(R.id.btnDivide).setOnClickListener(operatorClickListener)
+
+                // ==== Botão "=" (igual) ====
+        findViewById<Button>(R.id.btnEquals).setOnClickListener {
+            // Precisamos pegar qual é o segundo número
+            val text = tvExpression.text.toString()
+
+            var result = firstNumber
+            if (text.contains(operator)) {
+                val indexOp = text.indexOf(operator)
+                if (indexOp + 2 < text.length) {
+                    val secondPart = text.substring(indexOp + 2)
+                    secondNumber = parseDoubleSafe(secondPart)
+                } else {
+                    secondNumber = 0.0
+                }
             }
-            R.id.btn_multiplication -> {
-                result = a * b
+
+            when (operator) {
+                "+" -> result = firstNumber + secondNumber
+                "-" -> result = firstNumber - secondNumber
+                "*" -> result = firstNumber * secondNumber
+                "/" -> {
+                    // Evitar divisão por zero
+                    if (secondNumber == 0.0) {
+                        tvResult.text = "Erro"
+                        return@setOnClickListener
+                    } else {
+                        result = firstNumber / secondNumber
+                    }
+                }
             }
-            R.id.btn_division -> {
-                result = a / b
+
+            tvResult.text = result.toString()
+
+            tvExpression.text = result.toString()
+
+            isNewNumber = true
+        }
+
+        // ==== Botão DEL (apaga último caractere) ====
+        findViewById<Button>(R.id.btnDel).setOnClickListener {
+            var current = tvExpression.text.toString()
+            if (current.isNotEmpty()) {
+                current = current.substring(0, current.length - 1)
+                tvExpression.text = current
             }
         }
-        resulty.text = "Resultado: $result"
+
+        findViewById<Button>(R.id.btnClear).setOnClickListener {
+            firstNumber = 0.0
+            secondNumber = 0.0
+            operator = ""
+            isNewNumber = true
+            tvExpression.text = "0"
+            tvResult.text = ""
+        }
+
+        findViewById<Button>(R.id.btnSign).setOnClickListener {
+            val current = tvExpression.text.toString()
+            if (current.isEmpty()) {
+                tvExpression.text = "-"
+                isNewNumber = false
+                return@setOnClickListener
+            }
+            if (current.startsWith("-")) {
+                tvExpression.text = current.substring(1)
+            } else {
+                // Caso contrário, insere '-'
+                tvExpression.text = "-$current"
+            }
+        }
+    }
+
+    private fun parseDoubleSafe(value: String): Double {
+        return try {
+            value.trim().toDouble()
+        } catch (e: NumberFormatException) {
+            0.0
+        }
     }
 }
