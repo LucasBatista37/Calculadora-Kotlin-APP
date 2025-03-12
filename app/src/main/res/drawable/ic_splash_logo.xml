@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/white" />  <!-- Fundo branco (mude conforme necessário) -->
+    <item>
+        <bitmap
+            android:gravity="center"
+            android:src="@drawable/minimalist_calculator_logo" />  <!-- Substitua pelo nome do seu ícone -->
+    </item>
+</layer-list>

@@ -9,6 +9,7 @@
     android:background="@android:color/white"
     tools:context=".MainActivity">
 
+    <!-- TextView para mostrar a expressão (ex: "123 + 456") -->
     <TextView
         android:id="@+id/tvExpression"
         android:layout_width="match_parent"
@@ -19,6 +20,7 @@
         android:textSize="24sp"
         android:textColor="@android:color/black"/>
 
+    <!-- TextView para mostrar o resultado final (ex: "579") -->
     <TextView
         android:id="@+id/tvResult"
         android:layout_width="match_parent"
@@ -30,6 +32,7 @@
         android:textColor="@android:color/black"
         android:textStyle="bold"/>
 
+    <!-- Tabela dos botões, que ocupará o restante da tela (peso 1) -->
     <TableLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
