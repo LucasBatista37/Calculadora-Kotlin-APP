@@ -2,11 +2,19 @@ package com.example.myapplication
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.widget.Toolbar
+import androidx.drawerlayout.widget.DrawerLayout
+import com.google.android.material.navigation.NavigationView
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var drawerLayout: DrawerLayout
 
     private lateinit var tvExpression: TextView
     private lateinit var tvResult: TextView
@@ -20,6 +28,20 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        val toolbar: Toolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
+
+        // Configuração do DrawerLayout
+        drawerLayout = findViewById(R.id.drawer_layout)
+
+        // Configuração do NavigationView
+        val navigationView: NavigationView = findViewById(R.id.navigation_view)
+        navigationView.setNavigationItemSelectedListener { menuItem ->
+            // Fechar o Drawer quando um item for clicado
+            drawerLayout.closeDrawers()
+            true
+        }
 
         tvExpression = findViewById(R.id.tvExpression)
         tvResult = findViewById(R.id.tvResult)
@@ -133,9 +155,28 @@ class MainActivity : AppCompatActivity() {
             if (current.startsWith("-")) {
                 tvExpression.text = current.substring(1)
             } else {
-                // Caso contrário, insere '-'
                 tvExpression.text = "-$current"
             }
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.menu_drawer -> {
+                if (drawerLayout.isDrawerOpen(findViewById(R.id.navigation_view))) {
+                    drawerLayout.closeDrawers()
+                } else {
+                    drawerLayout.openDrawer(findViewById(R.id.navigation_view))
+                }
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
